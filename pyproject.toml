@@ -1,14 +1,17 @@
 [tool.poetry]
-name = "shell-genius"
+name = "shell-genie"
 version = "0.1.0"
 description = ""
 authors = ["Dylan Castillo <dylanjcastillo@gmail.com>"]
 readme = "README.md"
-packages = [{include = "shell_genius"}]
+packages = [{include = "shell_genie"}]
+
+[tool.poetry.scripts]
+shell-genie = "shell_genie.main:app"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-
+typer = {extras = ["all"], version = "^0.7.0"}
 
 [build-system]
 requires = ["poetry-core"]
