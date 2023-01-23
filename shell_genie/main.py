@@ -34,7 +34,7 @@ def init():
         except Exception:
             typer.prompt("I couldn't figure out your OS. What OS are you on?")
 
-    if os == "Linux":
+    if oper_sys == "Linux":
         try:
             shell_distro_str = subprocess.check_output(
                 ["grep -E '^(NAME)=' /etc/os-release"]
