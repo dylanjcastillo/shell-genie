@@ -36,18 +36,26 @@ def init():
 
     if oper_sys == "Linux":
         try:
-            shell_distro_str = subprocess.check_output(
-                ["grep -E '^(NAME)=' /etc/os-release"]
+            shell_distro_str = (
+                subprocess.check_output(["cat", "/etc/os-release"])
+                .decode("utf-8")
+                .split("\n")
             )
-            shell_version_str = subprocess.check_output(
-                ["grep -E '^(NAME)=' /etc/os-release"]
+            distro = (
+                [line for line in shell_distro_str if line.startswith("NAME")][0]
+                .split("=")[1]
+                .replace('"', "")
+                .strip()
             )
-            os_version = (
-                shell_distro_str.split("=")[1].strip()
-                + " "
-                + shell_version_str.split("=")[1].strip()
+            version = (
+                [line for line in shell_distro_str if line.startswith("VERSION")][0]
+                .split("=")[1]
+                .replace('"', "")
+                .strip()
             )
-        except Exception:
+            os_version = distro + " " + version
+        except Exception as e:
+            typer.echo(e)
             typer.prompt(
                 "I couldn't figure out your Linux distro and version. What's your Linux distro and version?"
             )
