@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 
 import openai
+import pyperclip
 import typer
 from dotenv import load_dotenv
 from rich.prompt import Prompt
@@ -28,8 +29,7 @@ def init():
             oper_sys = "Linux"
         else:
             raise Exception("uname -a didn't return a recognizable OS.")
-    except Exception as e:
-        typer.echo(e)
+    except Exception:
         try:
             computer_info = subprocess.check_output(
                 ["powershell", "Get-ComputerInfo"]
@@ -171,7 +171,7 @@ def ask(
         typer.echo("Description: " + description)
 
     if config["os"] == "Windows" and config["shell"] == "powershell":
-        subprocess.run(["echo", command, "|", "clip"], shell=True)
+        pyperclip.copy(command)
         typer.echo("Command copied to clipboard.")
     else:
         execute = typer.confirm("Execute command?")

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shell-genie"
-version = "0.1.4"
+version = "0.1.5"
 description = ""
 authors = ["Dylan Castillo <dylanjcastillo@gmail.com>"]
 readme = "README.md"
@@ -14,6 +14,7 @@ python = "^3.10"
 typer = {extras = ["all"], version = "^0.7.0"}
 python-dotenv = "^0.21.1"
 openai = "^0.26.1"
+pyperclip = "^1.8.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
