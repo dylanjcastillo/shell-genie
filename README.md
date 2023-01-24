@@ -1,3 +1,5 @@
-# shell-genie
+# 🧞‍♂️ Shell Genie
 
-An assistant to use the command line like a pro.
+_Your wishes are my commands._
+
+Shell Genie is a command line assistant that helps you to use the command line like a pro.

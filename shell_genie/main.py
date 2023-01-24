@@ -89,17 +89,7 @@ def init():
         "os": oper_sys,
         "os_version": os_version,
         "shell": shell,
-        "current_dir": "pwd",
-        "list_files": ["ls", "-a"],
     }
-
-    if oper_sys == "Windows":
-        if shell == "powershell":
-            config["current_dir"] = "Get-Location"
-            config["list_files"] = "Get-ChildItem"
-        else:
-            config["current_dir"] = "%cd%"
-            config["list_files"] = "dir"
 
     app_dir = typer.get_app_dir(APP_NAME)
     config_path: Path = Path(app_dir) / "config.json"
@@ -126,51 +116,42 @@ def ask(
     explain: bool = False,
 ):
     explain_text = ""
-    format_text = "Format: JSON with one key: 'command'. Make sure to escape the necessary characters."
+    format_text = "Command: <insert_command_here>"
 
     if explain:
         explain_text = "In addition, provide a detailed description of how the provided command works."
-        format_text = "Return a JSON with two keys'command' and 'description'. Make sure to escape the necessary characters."
+        format_text = (
+            "Command: <insert_command_here>\n Description: <insert_description_here>"
+        )
 
     app_dir = typer.get_app_dir(APP_NAME)
     config_path: Path = Path(app_dir) / "config.json"
     with open(config_path, "r") as f:
         config = json.load(f)
 
-    current_dir = subprocess.check_output(config["current_dir"]).decode("utf-8").strip()
-    files_in_dir = ", ".join(
-        subprocess.check_output(config["list_files"]).decode("utf-8").split("\n")
-    )
-
     prompt = f"""You're a command line tool that generates commands for the user.
     Shell: {config["shell"]}
-    OS: {config["os"]}, {config["os_version"]}
-    Current directory: {current_dir}
-    Files in current directory: {files_in_dir}
     Format: {format_text}
-    Instructions: Write a command line command that does the following: {wish}. {explain_text}
+    Instructions: Write a command line command that does the following: {wish}. It must work for {config["os"]}, {config["os_version"]}. {explain_text}
     """
-
-    typer.echo("Prompt: " + prompt)
 
     response = openai.Completion.create(
         model="text-davinci-003",
         prompt=prompt,
-        max_tokens=256,
+        max_tokens=200,
         temperature=0,
     )
-    json_response = response.choices[0].text.strip()
-
-    json_dict = json.loads(json_response)
-
-    typer.echo("Generated command: " + json_dict["command"])
+    responses_processed = response.choices[0].text.strip().split("\n")
+    command = responses_processed[0].replace("Command:", "").strip()
+    typer.echo("Command: " + command)
 
     if explain:
-        typer.echo("Description: " + json_dict["description"])
+        description = responses_processed[1].split("Description: ")[1]
+        typer.echo("Description: " + description)
 
     execute = typer.confirm("Execute command?")
     if execute:
-        os.system(json_dict["command"])
+        os.system(command)
 
 
 if __name__ == "__main__":

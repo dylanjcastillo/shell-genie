@@ -4,7 +4,7 @@ FROM python:3.11.1-slim
 
 WORKDIR /app
 
-COPY . . 
+COPY . .
 
 ENV POETRY_VERSION=1.3.2
 ENV POETRY_VENV=/opt/poetry/venv
@@ -16,5 +16,4 @@ ENV PATH="${PATH}:${POETRY_VENV}/bin"
 
 RUN poetry check
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev
-ENTRYPOINT ["/bin/bash"]
+RUN poetry install
