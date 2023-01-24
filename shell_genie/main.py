@@ -5,9 +5,9 @@ import subprocess
 from pathlib import Path
 
 import openai
-import rich
 import typer
 from dotenv import load_dotenv
+from rich.prompt import Prompt
 
 load_dotenv()
 
@@ -50,7 +50,7 @@ def init():
                 "I couldn't figure out your Windows version. What's your Windows version?"
             )
 
-        shell = rich.Prompt.ask(
+        shell = Prompt.ask(
             "What shell are you using?",
             choices=["cmd", "powershell", "git bash", "WSL"],
         )
