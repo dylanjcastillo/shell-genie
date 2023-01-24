@@ -1,9 +1,11 @@
 import json
 import os
+import re
 import subprocess
 from pathlib import Path
 
 import openai
+import rich
 import typer
 from dotenv import load_dotenv
 
@@ -29,10 +31,29 @@ def init():
     except Exception as e:
         typer.echo(e)
         try:
-            subprocess.check_output(["powershell", "Get-ComputerInfo"])
+            computer_info = subprocess.check_output(
+                ["powershell", "Get-ComputerInfo"]
+            ).decode("utf-8")
             oper_sys = "Windows"
         except Exception:
-            typer.prompt("I couldn't figure out your OS. What OS are you on?")
+            oper_sys = typer.prompt(
+                "I couldn't figure out your OS. What OS are you on?"
+            )
+
+    if oper_sys == "Windows":
+        try:
+            match = re.search(r"WindowsProductName\s*:\s*(.+)", computer_info)
+            if match:
+                os_version = match.group(1).replace("Windows", "").strip()
+        except Exception:
+            os_version = typer.prompt(
+                "I couldn't figure out your Windows version. What's your Windows version?"
+            )
+
+        shell = rich.Prompt.ask(
+            "What shell are you using?",
+            choices=["cmd", "powershell", "git bash", "WSL"],
+        )
 
     if oper_sys == "Linux":
         try:
