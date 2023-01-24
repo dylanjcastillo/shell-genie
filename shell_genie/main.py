@@ -159,7 +159,7 @@ def ask(
     response = openai.Completion.create(
         model="text-davinci-003",
         prompt=prompt,
-        max_tokens=200,
+        max_tokens=300 if explain else 180,
         temperature=0,
     )
     responses_processed = response.choices[0].text.strip().split("\n")
@@ -172,7 +172,10 @@ def ask(
 
     execute = typer.confirm("Execute command?")
     if execute:
-        os.system(command)
+        if config["os"] == "Windows" and config["shell"] == "powershell":
+            subprocess.run(["powershell", "-Command", command], shell=True)
+        else:
+            subprocess.run(command, shell=True)
 
 
 if __name__ == "__main__":
