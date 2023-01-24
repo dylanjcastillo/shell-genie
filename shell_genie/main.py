@@ -170,11 +170,12 @@ def ask(
         description = responses_processed[1].split("Description: ")[1]
         typer.echo("Description: " + description)
 
-    execute = typer.confirm("Execute command?")
-    if execute:
-        if config["os"] == "Windows" and config["shell"] == "powershell":
-            subprocess.run(["powershell", "-Command", command], shell=True)
-        else:
+    if config["os"] == "Windows" and config["shell"] == "powershell":
+        subprocess.run(["echo", command, "|", "clip"], shell=True)
+        typer.echo("Command copied to clipboard.")
+    else:
+        execute = typer.confirm("Execute command?")
+        if execute:
             subprocess.run(command, shell=True)
 
 
