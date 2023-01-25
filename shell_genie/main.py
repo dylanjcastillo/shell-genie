@@ -112,7 +112,7 @@ def ask(
         execute = Confirm.ask("Do you want to run the command?")
         if execute:
             subprocess.run(command, shell=True)
-            genie.post_execute(command)
+            genie.post_execute(command, description)
 
 
 if __name__ == "__main__":
