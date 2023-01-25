@@ -1,134 +1,85 @@
 import json
 import os
-import re
 import subprocess
 from pathlib import Path
 
-import openai
 import pyperclip
 import typer
-from dotenv import load_dotenv
-from rich.prompt import Prompt
+from rich import print
+from rich.prompt import Confirm, Prompt
 
-load_dotenv()
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-app = typer.Typer()
+from .utils import get_backend, get_os_info
 
 APP_NAME = ".shell_genie"
+app = typer.Typer()
 
 
 @app.command()
 def init():
-    try:
-        uname = subprocess.check_output(["uname", "-a"]).decode("utf-8")
-        if "Darwin" in uname:
-            oper_sys = "MacOS"
-        elif "Linux" in uname:
-            oper_sys = "Linux"
-        else:
-            raise Exception("uname -a didn't return a recognizable OS.")
-    except Exception:
-        try:
-            computer_info = subprocess.check_output(
-                ["powershell", "Get-ComputerInfo"]
-            ).decode("utf-8")
-            oper_sys = "Windows"
-        except Exception:
-            oper_sys = typer.prompt(
-                "I couldn't figure out your OS. What OS are you on?"
-            )
 
-    if oper_sys == "Windows":
-        try:
-            match = re.search(r"WindowsProductName\s*:\s*(.+)", computer_info)
-            if match:
-                os_version = match.group(1).replace("Windows", "").strip()
-        except Exception:
-            os_version = typer.prompt(
-                "I couldn't figure out your Windows version. What's your Windows version?"
-            )
+    backend = Prompt.ask("Select backend:", choices=["openai-gpt3", "free-trial"])
+    additional_params = {}
 
-        shell = Prompt.ask(
-            "What shell are you using?",
-            choices=["cmd", "powershell", "git bash", "WSL"],
+    if backend == "openai-gpt3":
+        additional_params["openai_api_key"] = Prompt.ask("Enter a OpenAI API key")
+
+    if backend == "free-trial":
+        additional_params["send-anonymous-usage-data"] = Confirm.ask(
+            "Do you want to send anonymous usage data to improve the quality of the results?",
+            default=True,
         )
 
-    if oper_sys == "Linux":
-        try:
-            shell_distro_str = (
-                subprocess.check_output(["cat", "/etc/os-release"])
-                .decode("utf-8")
-                .split("\n")
-            )
-            distro = (
-                [line for line in shell_distro_str if line.startswith("NAME")][0]
-                .split("=")[1]
-                .replace('"', "")
-                .strip()
-            )
-            version = (
-                [line for line in shell_distro_str if line.startswith("VERSION")][0]
-                .split("=")[1]
-                .replace('"', "")
-                .strip()
-            )
-            os_version = distro + " " + version
-        except Exception as e:
-            typer.echo(e)
-            typer.prompt(
-                "I couldn't figure out your Linux distro and version. What's your Linux distro and version?"
-            )
+    os_family, os_fullname = get_os_info()
 
-    if oper_sys == "MacOS":
-        try:
-            os_version_str = subprocess.check_output(["sw_vers"]).decode("utf-8")
-            os_version = os_version_str.split()[3].strip()
-        except Exception as e:
-            typer.echo(e)
-            typer.prompt(
-                "I couldn't figure out your MacOS version. What's your MacOS version?"
-            )
+    if os_family:
+        if not Confirm.ask(f"Is your OS {os_fullname}?"):
+            os_fullname = Prompt.ask("What is your OS and version? (e.g. MacOS 13.1)")
+    else:
+        os_fullname = Prompt.ask("What is your OS and version? (e.g. MacOS 13.1)")
 
-    if oper_sys == "Linux" or oper_sys == "MacOS":
-        try:
-            shell_str = os.environ.get("SHELL")
-            if "bash" in shell_str:
-                shell = "bash"
-            elif "zsh" in shell_str:
-                shell = "zsh"
-            elif "fish" in shell_str:
-                shell = "fish"
-            else:
-                raise Exception
-        except Exception as e:
-            typer.echo(e)
-            typer.prompt("I couldn't figure out your shell. What shell are you using?")
+    if os_family == "Windows":
+        shell = Prompt.ask(
+            "What shell are you using?",
+            choices=["cmd", "powershell"],
+        )
+
+    if os_family in ("Linux", "MacOS"):
+        shell_str = os.environ.get("SHELL") or ""
+        if "bash" in shell_str:
+            shell = "bash"
+        elif "zsh" in shell_str:
+            shell = "zsh"
+        elif "fish" in shell_str:
+            shell = "fish"
+        else:
+            typer.prompt("What shell are you using?")
 
     config = {
-        "os": oper_sys,
-        "os_version": os_version,
+        "backend": backend,
+        "os": os_family,
+        "os_fullname": os_fullname,
         "shell": shell,
-    }
+    } | additional_params
 
     app_dir = typer.get_app_dir(APP_NAME)
     config_path: Path = Path(app_dir) / "config.json"
 
-    typer.echo("Configuration settings: " + str(config))
+    print(f"Configuration settings: {config}")
 
     config_path.parent.mkdir(parents=True, exist_ok=True)
 
     if config_path.exists():
-        overwrite = typer.confirm("Config file already exists. Overwrite?")
+        overwrite = Confirm.ask(
+            "A config file already exists. Do you want to overwrite it?"
+        )
         if not overwrite:
-            typer.echo("Exiting...")
+            print("Did not overwrite config file.")
             return
 
     with open(config_path, "w") as f:
         json.dump(config, f)
 
-    typer.echo("Config file saved at " + str(config_path))
+    print(f"[green]Config file saved at {config_path}[/green]")
 
 
 @app.command()
@@ -136,47 +87,32 @@ def ask(
     wish: str = typer.Argument(..., help="What do you want to do?"),
     explain: bool = False,
 ):
-    explain_text = ""
-    format_text = "Command: <insert_command_here>"
-
-    if explain:
-        explain_text = "In addition, provide a detailed description of how the provided command works."
-        format_text = (
-            "Command: <insert_command_here>\n Description: <insert_description_here>"
-        )
-
     app_dir = typer.get_app_dir(APP_NAME)
-    config_path: Path = Path(app_dir) / "config.json"
+    config_path = Path(app_dir) / "config.json"
+
     with open(config_path, "r") as f:
         config = json.load(f)
 
-    prompt = f"""You're a command line tool that generates commands for the user.
-    Shell: {config["shell"]}
-    Format: {format_text}
-    Instructions: Write a command line command that does the following: {wish}. It must work for {config["os"]}, {config["os_version"]}. {explain_text}
-    """
+    genie = get_backend(**config)
+    try:
+        command, description = genie.ask(wish, explain=explain)
+    except Exception as e:
+        print(f"[red]Error: {e}[/red]")
+        return
 
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=prompt,
-        max_tokens=300 if explain else 180,
-        temperature=0,
-    )
-    responses_processed = response.choices[0].text.strip().split("\n")
-    command = responses_processed[0].replace("Command:", "").strip()
-    typer.echo("Command: " + command)
+    print(f"[bold]Command:[/bold] [yellow]{command}[/yellow]")
 
-    if explain:
-        description = responses_processed[1].split("Description: ")[1]
-        typer.echo("Description: " + description)
+    if description:
+        print(f"[bold]Description:[/bold] {description}")
 
     if config["os"] == "Windows" and config["shell"] == "powershell":
         pyperclip.copy(command)
-        typer.echo("Command copied to clipboard.")
+        print("[green]Command copied to clipboard.[/green]")
     else:
-        execute = typer.confirm("Execute command?")
+        execute = Confirm.ask("Do you want to run the command?")
         if execute:
             subprocess.run(command, shell=True)
+            genie.post_execute(command)
 
 
 if __name__ == "__main__":
