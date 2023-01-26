@@ -17,18 +17,21 @@ app = typer.Typer()
 @app.command()
 def init():
 
-    backend = Prompt.ask("Select backend:", choices=["openai-gpt3", "free-trial"])
+    backend = Prompt.ask("Select backend:", choices=["openai-gpt3", "free-genie"])
     additional_params = {}
 
     if backend == "openai-gpt3":
         additional_params["openai_api_key"] = Prompt.ask("Enter a OpenAI API key")
 
-    if backend == "free-trial":
-        additional_params["send-anonymous-usage-data"] = Confirm.ask(
-            "Do you want to send anonymous usage data to improve the quality of the results?",
-            default=True,
+    if backend == "free-genie":
+        print(
+            "[red]Note that the free-genie server will store anonymized data to improve the models. Also, I cannot guarantee that the server will be up and running 24/7.[/red]"
         )
-
+        if not Confirm.ask("Do you want to continue?"):
+            return
+        additional_params["training-feedback"] = Confirm.ask(
+            "Do you want to provide feedback to improve the model?"
+        )
     os_family, os_fullname = get_os_info()
 
     if os_family:
@@ -95,7 +98,7 @@ def ask(
 
     genie = get_backend(**config)
     try:
-        command, description = genie.ask(wish, explain=explain)
+        command, description = genie.ask(wish, explain)
     except Exception as e:
         print(f"[red]Error: {e}[/red]")
         return
@@ -112,7 +115,15 @@ def ask(
         execute = Confirm.ask("Do you want to run the command?")
         if execute:
             subprocess.run(command, shell=True)
-            genie.post_execute(command, description)
+            if config["training-feedback"]:
+                feedback = Confirm.ask("Did the command work?")
+            genie.post_execute(
+                wish=wish,
+                explain=explain,
+                command=command,
+                description=description,
+                feedback=feedback,
+            )
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 import openai
+import requests
 
 
 class BaseGenie:
@@ -8,8 +9,10 @@ class BaseGenie:
     def ask(self, wish: str, explain: bool = False):
         raise NotImplementedError
 
-    def post_execute(self, command: str, description: str):
-        raise NotImplementedError
+    def post_execute(
+        self, wish: str, explain: bool, command: str, description: str, feedback: bool
+    ):
+        pass
 
 
 class OpenAIGenie(BaseGenie):
@@ -18,7 +21,7 @@ class OpenAIGenie(BaseGenie):
         self.shell = shell
         openai.api_key = api_key
 
-    def _build_prompt(self, wish: str, explain: bool = False, config: dict = None):
+    def _build_prompt(self, wish: str, explain: bool = False):
         explain_text = ""
         format_text = "Command: <insert_command_here>"
 
@@ -49,14 +52,48 @@ class OpenAIGenie(BaseGenie):
         description = None
         if explain:
             description = responses_processed[1].split("Description: ")[1]
-            print(f"[bold]Description:[/bold] {description}")
 
         return command, description
 
-    def post_execute(self, command: str):
-        pass
-
 
 class FreeTrialGenie:
-    def __init__(self, api_key):
-        self.api_key = api_key
+    def __init__(self, os_fullname: str, shell: str):
+        self.url = "https://shell-genie.dylancastillo.co"
+        self.os_fullname = os_fullname
+        self.shell = shell
+
+    def ask(self, wish: str, explain: bool):
+        response = requests.post(
+            url=self.url + "/ask",
+            json={
+                "wish": wish,
+                "explain": explain,
+                "os_fullname": self.os_fullname,
+                "shell": self.shell,
+            },
+        )
+
+        if response.status_code != 200:
+            raise ValueError("Error in response.")
+
+        command = response.json()["command"]
+        description = response.json()["description"]
+        return command, description
+
+    def post_execute(
+        self, wish: str, explain: bool, command: str, description: str, feedback: bool
+    ):
+
+        requests.post(
+            url=self.url + "/post_execute",
+            json={
+                "wish": wish,
+                "explain": explain,
+                "os_fullname": self.os_fullname,
+                "shell": self.shell,
+                "command": command,
+                "description": description,
+                "correct": feedback,
+            },
+        )
+        return

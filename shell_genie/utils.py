@@ -20,7 +20,10 @@ def get_backend(**config: dict):
             os_fullname=config["os_fullname"],
             shell=config["shell"],
         )
-    elif backend_name == "free-trial":
-        return FreeTrialGenie()
+    elif backend_name == "free-genie":
+        return FreeTrialGenie(
+            os_fullname=config["os_fullname"],
+            shell=config["shell"],
+        )
     else:
         raise ValueError(f"Unknown backend: {backend_name}")
