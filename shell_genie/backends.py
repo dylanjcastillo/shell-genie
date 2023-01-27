@@ -56,7 +56,7 @@ class OpenAIGenie(BaseGenie):
         return command, description
 
 
-class FreeTrialGenie:
+class FreeTrialGenie(BaseGenie):
     def __init__(self, os_fullname: str, shell: str):
         self.url = "https://shell-genie.dylancastillo.co"
         self.os_fullname = os_fullname
