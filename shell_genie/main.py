@@ -25,12 +25,12 @@ def init():
 
     if backend == "free-genie":
         print(
-            "[red]Note that the free-genie server will store anonymized data to improve the models. Also, I cannot guarantee that the server will be up and running 24/7.[/red]"
+            "[yellow]Note that this server will store the requested command, OS, and shell version to improve the model. Also, I cannot guarantee that the server will be up and running 24/7.[/yellow]"
         )
         if not Confirm.ask("Do you want to continue?"):
             return
         additional_params["training-feedback"] = Confirm.ask(
-            "Do you want to provide feedback to improve the model?"
+            "Do you want to provide feedback about the generated commands to improve the models?"
         )
     os_family, os_fullname = get_os_info()
 
