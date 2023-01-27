@@ -15,7 +15,9 @@ The recommended way to install is using [pipx](https://pypa.github.io/pipx/):
 Alternatively, you can install it using pip:
 
 1. Install Python 3.10 or higher.
-2. Install Shell Genie: `pip install shell-genie`
+2. Create a virtual environment in your preferred location: `python -m venv .venv`
+3. Activate the virtual environment: `source .venv/bin/activate`
+4. Install Shell Genie: `pip install shell-genie`
 
 ## How to use
 
