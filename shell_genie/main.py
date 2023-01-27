@@ -116,6 +116,7 @@ def ask(
         execute = Confirm.ask("Do you want to run the command?")
         if execute:
             subprocess.run(command, shell=True)
+            feedback = False
             try:
                 if config["training-feedback"]:
                     feedback = Confirm.ask("Did the command work?")
