@@ -67,7 +67,8 @@ def init():
     app_dir = typer.get_app_dir(APP_NAME)
     config_path: Path = Path(app_dir) / "config.json"
 
-    print(f"Configuration settings: {config}")
+    print("The following configuration will be saved:")
+    print(config)
 
     config_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -82,7 +83,7 @@ def init():
     with open(config_path, "w") as f:
         json.dump(config, f)
 
-    print(f"[green]Config file saved at {config_path}[/green]")
+    print(f"[bold green]Config file saved at {config_path}[/bold green]")
 
 
 @app.command()
@@ -115,8 +116,11 @@ def ask(
         execute = Confirm.ask("Do you want to run the command?")
         if execute:
             subprocess.run(command, shell=True)
-            if config["training-feedback"]:
-                feedback = Confirm.ask("Did the command work?")
+            try:
+                if config["training-feedback"]:
+                    feedback = Confirm.ask("Did the command work?")
+            except KeyError:
+                pass
             genie.post_execute(
                 wish=wish,
                 explain=explain,
