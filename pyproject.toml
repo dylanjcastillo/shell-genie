@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shell-genie"
-version = "0.2.2"
+version = "0.2.3"
 description = ""
 authors = ["Dylan Castillo <dylanjcastillo@gmail.com>"]
 readme = "README.md"
