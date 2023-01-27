@@ -6,7 +6,7 @@ Shell Genie is a command-line tool that lets you interact with the terminal in p
 
 ## Installation
 
-The recommended way to install is using [pipx](https://pypa.github.io/pipx/):
+The recommended way to install Shell Genie is using [pipx](https://pypa.github.io/pipx/):
 
 1. Install Python 3.10 or higher.
 2. Install [pipx](https://github.com/pypa/pipx#install-pipx).
