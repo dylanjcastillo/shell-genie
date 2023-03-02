@@ -91,7 +91,7 @@ class FreeTrialGenie(BaseGenie):
                 "explain": explain,
                 "os_fullname": self.os_fullname,
                 "shell": self.shell,
-                "command": command,
+               "command": command,
                 "description": description,
                 "correct": feedback,
             },
