@@ -70,3 +70,7 @@ Here are two short videos showing how to use the tool:
 ## Limitations
 
 As you can imagine not all the commands provided by the genie work as expected. Use them at your own risk.
+
+## License
+
+This project is licensed under the terms of the MIT license.
