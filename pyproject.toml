@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shell-genie"
-version = "0.2.7"
+version = "0.2.8"
 description = "Shell Genie is a command-line tool that lets you interact with the terminal in plain English. You ask the genie what you want to do and it will give you the command you need."
 authors = ["Dylan Castillo <dylanjcastillo@gmail.com>"]
 readme = "README.md"
