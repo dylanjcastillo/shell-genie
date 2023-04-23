@@ -26,27 +26,45 @@ class OpenAIGenie(BaseGenie):
         format_text = "Command: <insert_command_here>"
 
         if explain:
-            explain_text = "In addition, provide a detailed description of how the provided command works."
-            format_text = "Command: <insert_command_here>\n Description: <insert_description_here>"
+            explain_text = (
+                "Also, provide a detailed description of how the command works."
+            )
+            format_text = "Command: <insert_command_here>\n Description: <insert_description_here> (the description should be in the same language the user is using)"
 
-        prompt = f"""You're a command line tool that generates CLI commands for the user.
+        prompt = f"""Instructions: Write a CLI command that does the following: {wish}. Make sure the command is correct and works on {self.os_fullname} using {self.shell}. {explain_text}
+
         Format: {format_text}
-        Instructions: Write a CLI command that does the following: {wish}. It must work on {self.os_fullname} using {self.shell}. {explain_text}
-        """
 
+        Examples:
+        ###
+        Command: ls
+        Description: List all files in the current directory.
+        ###
+        Command: ls
+        Description: Lista todos los archivos en el directorio actual.
+        ###
+        """.strip()
         return prompt
 
     def ask(self, wish: str, explain: bool = False):
 
         prompt = self._build_prompt(wish, explain)
 
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=prompt,
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You're a command line tool that generates CLI commands for the user.",
+                },
+                {"role": "user", "content": prompt},
+            ],
             max_tokens=300 if explain else 180,
             temperature=0,
         )
-        responses_processed = response.choices[0].text.strip().split("\n")
+        responses_processed = (
+            response["choices"][0]["message"]["content"].strip().split("\n")
+        )
         command = responses_processed[0].replace("Command:", "").strip()
 
         description = None
@@ -91,7 +109,7 @@ class FreeTrialGenie(BaseGenie):
                 "explain": explain,
                 "os_fullname": self.os_fullname,
                 "shell": self.shell,
-               "command": command,
+                "command": command,
                 "description": description,
                 "correct": feedback,
             },

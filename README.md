@@ -27,7 +27,7 @@ Alternatively, you can install it using pip:
    shell-genie init
    ```
 
-   This will prompt you to select a backend (either `openai-gpt3` or `free-genie`) and provide any additional information that is required (e.g. your own [OpenAI API](https://openai.com/api/) key for `openai-gpt3`).
+   This will prompt you to select a backend (either `openai-gpt3.5-turbo` or `free-genie`) and provide any additional information that is required (e.g. your own [OpenAI API](https://openai.com/api/) key for `openai-gpt3.5-turbo`).
 
    The `free-genie` backend is free to use. I'm hosting it, and as you can imagine I'm not a big corporation with unlimited money, so there's no guarantee that it will be available at all times. My goal is to generate a dataset of commands to fine-tune a model later on (this is mentioned during the initialization process).
 

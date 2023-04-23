@@ -17,10 +17,12 @@ app = typer.Typer()
 @app.command()
 def init():
 
-    backend = Prompt.ask("Select backend:", choices=["openai-gpt3", "free-genie"])
+    backend = Prompt.ask(
+        "Select backend:", choices=["openai-gpt-3.5-turbo", "free-genie"]
+    )
     additional_params = {}
 
-    if backend == "openai-gpt3":
+    if backend == "openai-gpt-3.5-turbo":
         additional_params["openai_api_key"] = Prompt.ask("Enter a OpenAI API key")
 
     if backend == "free-genie":
