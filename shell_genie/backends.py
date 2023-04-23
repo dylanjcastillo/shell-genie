@@ -34,15 +34,6 @@ class OpenAIGenie(BaseGenie):
         prompt = f"""Instructions: Write a CLI command that does the following: {wish}. Make sure the command is correct and works on {self.os_fullname} using {self.shell}. {explain_text}
 
         Format: {format_text}
-
-        Examples:
-        ###
-        Command: ls
-        Description: List all files in the current directory.
-        ###
-        Command: ls
-        Description: Lista todos los archivos en el directorio actual.
-        ###
         """.strip()
         return prompt
 
@@ -65,6 +56,9 @@ class OpenAIGenie(BaseGenie):
         responses_processed = (
             response["choices"][0]["message"]["content"].strip().split("\n")
         )
+        responses_processed = [
+            x.strip() for x in responses_processed if len(x.strip()) > 0
+        ]
         command = responses_processed[0].replace("Command:", "").strip()
 
         description = None
