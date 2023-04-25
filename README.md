@@ -58,7 +58,24 @@ Alternatively, you can install it using pip:
    Do you want to run the command? [y/n]:
    ```
 
+   You can ask for commands in English or other languages, and the genie will try to provide you with a explanation in the same language.
+
 3. Run the command if you want to. If you're using `free-genie`, and you want to help improve the tool, you can provide feedback after you've run the command.
+
+### Using an alias
+
+If you find that writing `shell-genie ask` is too verbose, you can create an alias for the tool:
+
+```shell
+echo "alias please='shell-genie ask'" >> ~/.bashrc
+source ~/.bashrc
+```
+
+And now you can ask the genie using `please`:
+
+```shell
+please "find all json files in the current directory that are larger than 1MB"
+```
 
 ## Examples
 
