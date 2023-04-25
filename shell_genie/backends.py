@@ -29,16 +29,19 @@ class OpenAIGenie(BaseGenie):
             explain_text = (
                 "Also, provide a detailed description of how the command works."
             )
-            format_text = "Command: <insert_command_here>\n Description: <insert_description_here> (the description should be in the same language the user is using)"
+            format_text += "\nDescription: <insert_description_here>\nThe description should be in the same language the user is using."
+        format_text += "\nDon't enclose the command with extra quotes or backticks."
 
-        prompt = f"""Instructions: Write a CLI command that does the following: {wish}. Make sure the command is correct and works on {self.os_fullname} using {self.shell}. {explain_text}
-
-        Format: {format_text}
-        """.strip()
+        prompt_list = [
+            f"Instructions: Write a CLI command that does the following: {wish}. Make sure the command is correct and works on {self.os_fullname} using {self.shell}. {explain_text}",
+            "Format:",
+            format_text,
+            "Make sure you use the format exactly as it is shown above.",
+        ]
+        prompt = "\n\n".join(prompt_list)
         return prompt
 
     def ask(self, wish: str, explain: bool = False):
-
         prompt = self._build_prompt(wish, explain)
 
         response = openai.ChatCompletion.create(
@@ -60,6 +63,9 @@ class OpenAIGenie(BaseGenie):
             x.strip() for x in responses_processed if len(x.strip()) > 0
         ]
         command = responses_processed[0].replace("Command:", "").strip()
+
+        if command[0] == command[-1] and command[0] in ["'", '"', "`"]:
+            command = command[1:-1]
 
         description = None
         if explain:
@@ -95,7 +101,6 @@ class FreeTrialGenie(BaseGenie):
     def post_execute(
         self, wish: str, explain: bool, command: str, description: str, feedback: bool
     ):
-
         requests.post(
             url=self.url + "/post_execute",
             json={
