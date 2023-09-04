@@ -86,7 +86,7 @@ Here are two short videos showing how to use the tool:
 
 ## Limitations
 
-As you can imagine not all the commands provided by the genie work as expected and, if you ask for it, you will receive commands that might wreck your OS (e.g, `rm -rf /`. So, don't run commands you don't understand how they work, and if you do, do it at your own risk.
+As you can imagine, not all the commands provided by the genie work as expected. If you request them, you might receive commands that could wreck your OS (e.g., rm -rf /). So, don't run commands if you don't understand their functions. If you choose to execute them despite not understanding them, do so at your own risk.
 
 ## License
 
