@@ -92,6 +92,7 @@ def init():
 def ask(
     wish: str = typer.Argument(..., help="What do you want to do?"),
     explain: bool = False,
+    execute: bool = None
 ):
     app_dir = typer.get_app_dir(APP_NAME)
     config_path = Path(app_dir) / "config.json"
@@ -115,7 +116,8 @@ def ask(
         pyperclip.copy(command)
         print("[green]Command copied to clipboard.[/green]")
     else:
-        execute = Confirm.ask("Do you want to run the command?")
+        if execute is None:
+            execute = Confirm.ask("Do you want to run the command?")
         if execute:
             subprocess.run(command, shell=True)
             feedback = False
