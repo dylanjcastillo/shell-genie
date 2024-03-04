@@ -1,3 +1,5 @@
+**I am no longer maintaining this repository. Please consider using a tool such as [shellGPT](https://github.com/TheR1D/shell_gpt)**
+
 # 🧞‍♂️ Shell Genie
 
 _Your wishes are my commands._
