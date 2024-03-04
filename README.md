@@ -64,6 +64,17 @@ Alternatively, you can install it using pip:
 
 3. Run the command if you want to. If you're using `free-genie`, and you want to help improve the tool, you can provide feedback after you've run the command.
 
+   You can use `shell-genie ask --no-execute` to inhibit the "Run this command" question, like this:
+
+   ```shell
+   shell-genie ask --no-execute "list open files for process"
+   ```
+   And you'll see an output similar to this:
+
+   ```shell
+   Command: lsof -p <process_id>
+   ```
+
 ### Using an alias
 
 If you find that writing `shell-genie ask` is too verbose, you can create an alias for the tool:
